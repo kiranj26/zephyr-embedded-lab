@@ -5,7 +5,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 | # | Episode | Watched | Ref runs | My build | Challenge | Deeper ×2 | Notes | Date |
 |---|---|---|---|---|---|---|---|---|
 | 00 | Setup (Mac, Docker, first flash) | – | ☑ | ☑ | – | – | ☐ | 2026-10-14 |
-| 01 | Getting Started – Blink | ☐ | ☑ | ◐ | ☐ | ☐ | ☐ | |
+| 01 | Getting Started – Blink | ☐ | ☑ | ◐ | ☑ | ☐ | ◐ | |
 | 02 | CMake | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 03 | Kconfig | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 04 | Devicetree | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
@@ -33,3 +33,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 - DT compatible + status=okay → CONFIG_DT_HAS_*_ENABLED → driver Kconfig `depends on` → driver auto-enabled
 - GPIO_ACTIVE_LOW: same C code, inverted physical level (_dt = logical, _raw = physical)
 - k_msleep → idle thread → waiti low-power, no busy loop
+- Every k_msleep adds +1 tick → drift scales with the number of sleeps (SOS: 22 sleeps = +2.2 ms per cycle)
+- A pinctrl group only applies when its device is enabled (GPIO17 in i2s0_default is harmless while i2s0 is disabled)
+- GPIO_OUTPUT_INACTIVE vs GPIO_OUTPUT: start in a known (off) state
+- #define vs static const vs enum (type, debugger visibility, compile-time constant)

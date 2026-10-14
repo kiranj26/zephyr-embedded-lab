@@ -4,9 +4,20 @@
 **Blog / written version:** [Getting Started – Installation and Blink](https://www.digikey.com/en/maker/tutorials/2025/introduction-to-zephyr-part-1-getting-started-installation-and-blink) ·
 **Course code:** `01_blink` ·
 **Your starter:** `workspace/apps/01_blink` ·
-**Hardware:** LED + 330 Ω on GPIO13
+**Hardware:** LED + 330 Ω on GPIO13 (plus a second LED + 330 Ω on GPIO17 for the alternate demo)
 
 > Everything later builds on this loop: Docker build → host flash → serial console. You also meet devicetree aliases and the GPIO API for the first time.
+
+## My results: demo videos
+
+Running on my ESP32-S3-DevKitC-1 (N16R8), from [`workspace/apps/01_blink`](../../workspace/apps/01_blink/src/main.c). The demo is picked with `#define DEMO` in `main.c`.
+
+| Demo | Video | What it shows | Serial output |
+|---|---|---|---|
+| `DEMO_SOS` | [▶ DEMO_SOS.mp4](DEMO_SOS.mp4) (15 s) | LED 1 (GPIO13) blinking `· · ·  — — —  · · ·` in Morse, unit = 200 ms | `SOS #n  cycle: 6802200 us`: ideal 6.8 s + 22 sleeps × 1 tick |
+| `DEMO_ALTERNATE` | [▶ DEMO_ALTERNATE.mp4](DEMO_ALTERNATE.mp4) (5 s) | LED 1 (GPIO13) and LED 2 (GPIO17) always opposite, swapping every second | `LED1 (GPIO13): 1   LED2 (GPIO17): 0` |
+
+Write-ups: [notes.md](notes.md) (concepts, findings, bugs) · [todo2-sos-guide.md](todo2-sos-guide.md) (SOS design and timing analysis) · [gpio-analysis.md](gpio-analysis.md) (why GPIO17)
 
 ## 1. Before you watch (5 min)
 - Run `/lesson 01` in Claude Code, or skim this page.
@@ -47,7 +58,7 @@ Stuck? `/hint 01 1`, then level 2, then 3. Open the solution only after a real a
 - What's the difference between `printk` and `printf` here?
 
 ## Done when
-- [ ] Reference runs on my board
+- [x] Reference runs on my board
 - [ ] My version in `workspace/apps/01_blink` runs and I can explain every line
 - [ ] Challenge attempted before peeking, then reviewed
 - [ ] Two "go deeper" items done

@@ -1,15 +1,21 @@
-/* Lesson 1: external LED on GPIO13 -> 330R -> LED -> GND.
+/* Lesson 1: external LEDs, each wired GPIO -> 330R -> LED -> GND.
+ *   LED 1: GPIO13
+ *   LED 2: GPIO17 (TODO 3; see lessons/01_getting-started/gpio-analysis.md for why 17)
  * (The onboard RGB LED is a WS2812 and cannot be driven with plain GPIO.)
  */
 / {
 	aliases {
 		my-led = &led0;
+		my-led2 = &led1;
 	};
 
 	leds {
 		compatible = "gpio-leds";
 		led0: d13 {
 			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+		};
+		led1: d17 {
+			gpios = <&gpio0 17 GPIO_ACTIVE_HIGH>;
 		};
 	};
 };
