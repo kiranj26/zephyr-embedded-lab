@@ -1,8 +1,8 @@
 ---
 name: lab-workflow
-description: How to build, flash, capture serial output, and organize code in the Zephyr S3 Lab repo (Docker container + macOS host). Use whenever you need to compile, flash, run, or observe firmware, or create/locate apps, builds, notes, and progress files.
+description: How to build, flash, capture serial output, and organize code in the Zephyr Embedded Lab repo (Docker container + macOS host). Use whenever you need to compile, flash, run, or observe firmware, or create/locate apps, builds, notes, and progress files.
 ---
-# Zephyr S3 Lab workflow
+# Zephyr Embedded Lab workflow
 
 ## Architecture
 - Container `zephyr-lab` (image `env-zephyr-espressif`, built from `course/Dockerfile.espressif`).

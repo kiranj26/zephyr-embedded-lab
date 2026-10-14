@@ -14,10 +14,9 @@ Docker Desktop on macOS can't pass USB devices into containers. So **build in th
    Xcode CLT (`xcode-select --install`), Homebrew (for Python 3.12 if missing).
 2. **Get the repo and the course:**
    ```sh
-   git clone <your-repo-url> zephyr-s3-lab && cd zephyr-s3-lab
+   git clone --recursive https://github.com/kiranj26/zephyr-embedded-lab.git && cd zephyr-embedded-lab
    make bootstrap        # adds github.com/ShawnHymel/introduction-to-zephyr as submodule course/
    ```
-   (If you unzipped this template instead of cloning: `cd zephyr-s3-lab && git init && make bootstrap`.)
 3. **Host tools:** `make setup` creates `venv/` with `esptool==4.8.1` and `pyserial==3.5`, the versions the course uses.
 4. **Image:** `make image` builds `course/Dockerfile.espressif` for your CPU (arm64 on Apple Silicon).
    - If it fails downloading the SDK/host tools on arm64: `PLATFORM=linux/amd64 make image` (emulated; enable Rosetta in Docker Desktop).

@@ -1,4 +1,4 @@
-# Progress — Zephyr S3 Lab
+# Progress — Zephyr Embedded Lab
 
 Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` at the end of each session.
 

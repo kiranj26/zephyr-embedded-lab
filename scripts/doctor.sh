@@ -2,7 +2,7 @@
 # Checks every link in the chain and says what to fix.
 source "$(dirname "$0")/lib.sh"
 ok(){ echo "  ✔ $*"; }; bad(){ echo "  ✖ $*"; FAIL=1; }; FAIL=0
-echo "Zephyr S3 Lab doctor"
+echo "Zephyr Embedded Lab doctor"
 [ -f "$ROOT/course/README.md" ] && ok "course/ submodule present" || bad "course/ missing → make bootstrap"
 [ -x "$ROOT/venv/bin/python" ] && ok "host venv" || bad "host venv missing → make setup"
 "$ROOT/venv/bin/python" -c "import serial, esptool" 2>/dev/null && ok "pyserial + esptool" || bad "pip packages → make setup"

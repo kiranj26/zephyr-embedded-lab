@@ -1,4 +1,4 @@
-# Zephyr S3 Lab
+# Zephyr Embedded Lab
 
 **A personal learning lab for Shawn Hymel's *Introduction to Zephyr* course: ESP32-S3-DevKitC-1 (N16R8) · macOS · Docker · Claude Code.**
 
@@ -18,7 +18,7 @@ make run APP=01                                          # every day
 ## What's inside
 
 ```
-zephyr-s3-lab/
+zephyr-embedded-lab/
 ├── README.md                 ← you are here
 ├── CLAUDE.md                 ← project memory for Claude Code (rules, board facts, map)
 ├── PROGRESS.md               ← your tracker (12 lessons + capstone)
@@ -57,7 +57,7 @@ zephyr-s3-lab/
 
 | Step | Command | Notes |
 |---|---|---|
-| 1 | `git clone --recursive https://github.com/kiranj26/Zephyr_ESP32S3.git && cd Zephyr_ESP32S3 && make bootstrap` | fetches the `course/` submodule (read-only reference) |
+| 1 | `git clone --recursive https://github.com/kiranj26/zephyr-embedded-lab.git && cd zephyr-embedded-lab && make bootstrap` | fetches the `course/` submodule (read-only reference) |
 | 2 | `make setup` | Python 3.12 venv with esptool 4.8.1 + pyserial 3.5 (host side) |
 | 3 | `make image` | builds the course's Docker image (20–40 min, once) |
 | 4 | `make up` | starts container `zephyr-lab` → VS Code at http://localhost:8800 |

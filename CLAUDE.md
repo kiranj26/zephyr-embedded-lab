@@ -1,4 +1,4 @@
-# Zephyr S3 Lab — project memory for Claude Code
+# Zephyr Embedded Lab — project memory for Claude Code
 
 ## Who I am and what this repo is
 I'm learning Zephyr RTOS by following Shawn Hymel's **Introduction to Zephyr** (DigiKey, 12 parts).

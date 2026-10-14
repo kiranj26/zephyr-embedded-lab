@@ -1,4 +1,4 @@
-# Zephyr S3 Lab — one front door for everything. Run `make help`.
+# Zephyr Embedded Lab — one front door for everything. Run `make help`.
 # Variables: APP, BOARD, BOARD_ROOT, PORT, BAUD, SECS, NAME, N
 APP ?=
 SECS ?= 8
