@@ -4,8 +4,8 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 
 | # | Episode | Watched | Ref runs | My build | Challenge | Deeper ×2 | Notes | Date |
 |---|---|---|---|---|---|---|---|---|
-| 00 | Setup (Mac, Docker, first flash) | – | ☑ | ☑ | – | – | ☐ | 2026-10-14 |
-| 01 | Getting Started – Blink | ☐ | ☑ | ◐ | ☑ | ☐ | ◐ | |
+| 00 | Setup (Mac, Docker, first flash) | – | ☑ | ☑ | – | – | ☑ | 2026-10-14 |
+| 01 | Getting Started – Blink | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-14 |
 | 02 | CMake | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 03 | Kconfig | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 04 | Devicetree | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |

@@ -1,9 +1,9 @@
 # Notes — 01_getting-started
 
-Started: 2026-10-14 · Finished:
+Started: 2026-10-14 · Finished: 2026-10-14
 
 ## The idea in my own words (3–5 sentences)
-_TODO: write this myself after watching the video (see the prompt at the bottom)._
+Zephyr gives me a kernel, drivers and board support, so my blink program only says *what* to do (toggle an LED, sleep) and not *how* the ESP32-S3's GPIO registers work. The hardware is described in the devicetree: my overlay adds a `leds` node with `gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>` and an alias `my-led`. At build time that becomes C macros (`DT_ALIAS(my_led)` → `DT_N_S_leds_S_d13`), and `GPIO_DT_SPEC_GET` packs them into a struct holding the controller device, the pin and the flags. Kconfig decides which software gets built, and the devicetree switches drivers on through `DT_HAS_*_ENABLED`. The build runs in Docker, but the Mac flashes and reads the console, because Docker on macOS can't see USB.
 
 ## Key concepts
 - **Build/flash split:** Docker builds the firmware, but Docker on macOS can't reach USB, so the Mac flashes and reads the console (esptool + pyserial in `venv/`).
@@ -75,6 +75,17 @@ _TODO: write this myself after watching the video (see the prompt at the bottom)
 No formal challenge in this lesson. Extensions: [x] print uptime (k_msleep = +1 tick) · [x] SOS · [x] second LED on **GPIO17** (`DEMO_ALTERNATE`).
 - **SOS design:** helper functions with a shared `send_letter(on_ms)`; every timing derived from `UNIT_MS`; helpers are `static` and return GPIO errors up to `main()`; one printk per cycle; old blink kept behind `#define DEMO`. Each gap is built as "element gap + pad" so the arithmetic never double-counts.
 - **Lesson:** `#define` = untyped text substitution; `static const` = typed object (visible in GDB, but not a compile-time constant in C); `enum` = typed integer compile-time constant.
+
+## Go deeper (2 done)
+- **`gpio_pin_set_dt` vs `gpio_pin_set_raw`:** `_dt`/`gpio_pin_set` take a *logical* value and apply the DT flags (ACTIVE_LOW inverts it). `_raw` drives the *physical* level and ignores the flags. That's why `GPIO_ACTIVE_LOW` needs no C change with `_dt`. The same idea applies to `GPIO_OUTPUT_INACTIVE` (logical "off").
+- **Which files define a board** (`boards/espressif/esp32s3_devkitc/`):
+  - `board.yml`: name, SoC, CPU clusters → the `esp32s3_devkitc/esp32s3/procpu` target string
+  - `Kconfig.esp32s3_devkitc`: selects the SoC for the board
+  - `esp32s3_devkitc_procpu.dts` (+ `esp32s3_devkitc-pinctrl.dtsi`): the hardware, including pinctrl groups like `i2s0_default` that use GPIO17
+  - `esp32s3_devkitc_procpu_defconfig`: default Kconfig, e.g. `CONFIG_GPIO=y`
+  - `board.cmake`: how to flash and debug
+  - `*_appcpu.*`: the same for the second core
+  - This is the set of files I'll write myself in lesson 12 (`s3_n16r8`).
 
 ## Open questions
 - [ ] Try `GPIO_ACTIVE_LOW` myself and confirm `_VAL_flags` becomes `1` and the LED looks inverted.

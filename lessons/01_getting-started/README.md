@@ -24,10 +24,10 @@ Write-ups: [notes.md](notes.md) (concepts, findings, bugs) · [todo2-sos-guide.m
 - Hardware ready? Run `/wire 01` and double-check the pins in `docs/01-hardware.md`.
 
 ## 2. Watch guide — look for these
-- [ ] What Zephyr is (kernel + drivers + subsystems + board support) and why it's vendor-neutral
-- [ ] The Docker image: what's in /opt/toolchains (zephyr, modules, SDK) vs /workspace
-- [ ] The board target string `esp32s3_devkitc/esp32s3/procpu` (board / SoC / CPU cluster)
-- [ ] How the overlay creates `my-led` and how `GPIO_DT_SPEC_GET(DT_ALIAS(my_led), gpios)` uses it
+- [x] What Zephyr is (kernel + drivers + subsystems + board support) and why it's vendor-neutral
+- [x] The Docker image: what's in /opt/toolchains (zephyr, modules, SDK) vs /workspace
+- [x] The board target string `esp32s3_devkitc/esp32s3/procpu` (board / SoC / CPU cluster)
+- [x] How the overlay creates `my-led` and how `GPIO_DT_SPEC_GET(DT_ALIAS(my_led), gpios)` uses it
 
 ## 3. Run the reference (read-only)
 ```sh
@@ -48,8 +48,8 @@ Stuck? `/hint 01 1`, then level 2, then 3. Open the solution only after a real a
 
 ## 6. Go deeper (pick at least two)
 - [ ] Browse `/opt/toolchains/zephyr/samples/basic/blinky` and compare it with yours
-- [ ] Read the doc comment for `gpio_pin_set_dt` vs `gpio_pin_set_raw`
-- [ ] Look at `boards/espressif/esp32s3_devkitc/` in the Zephyr tree: which files define a board?
+- [x] Read the doc comment for `gpio_pin_set_dt` vs `gpio_pin_set_raw`
+- [x] Look at `boards/espressif/esp32s3_devkitc/` in the Zephyr tree: which files define a board?
 
 ## 7. Self-check (answer in your notes without looking)
 - What three parts make up a board target string?
@@ -59,7 +59,7 @@ Stuck? `/hint 01 1`, then level 2, then 3. Open the solution only after a real a
 
 ## Done when
 - [x] Reference runs on my board
-- [ ] My version in `workspace/apps/01_blink` runs and I can explain every line
-- [ ] Challenge attempted before peeking, then reviewed
-- [ ] Two "go deeper" items done
-- [ ] `notes.md` written (`/notes 01`), `PROGRESS.md` updated (`/progress`), committed
+- [x] My version in `workspace/apps/01_blink` runs and I can explain every line
+- [x] Challenge attempted before peeking, then reviewed
+- [x] Two "go deeper" items done
+- [x] `notes.md` written (`/notes 01`), `PROGRESS.md` updated (`/progress`), committed
