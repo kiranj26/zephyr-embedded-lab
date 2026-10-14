@@ -1,0 +1,7 @@
+config MY_SENSOR
+	bool "My I2C temperature sensor"
+	default n
+	depends on I2C
+	depends on SENSOR
+	help
+	  Template driver. Rename for your part (e.g. MCP9808_MINE).

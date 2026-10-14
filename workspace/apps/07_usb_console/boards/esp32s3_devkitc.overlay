@@ -1,0 +1,22 @@
+/* Lesson 7 challenge: send printk() out of the native "USB" port instead of the "UART" port.
+ * Hint (from the episode): look at the `chosen` node in
+ *   /opt/toolchains/zephyr/boards/espressif/esp32s3_devkitc/esp32s3_devkitc_procpu.dts
+ * Which node represents the native USB-Serial/JTAG peripheral? Point zephyr,console at it and enable it.
+ * Keep the LED from lesson 1 so you can see it's running.
+ */
+/ {
+	aliases {
+		my-led = &led0;
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led0: d13 {
+			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+		};
+	};
+
+	/* TODO: chosen { ... }; */
+};
+
+/* TODO: enable the USB serial node */

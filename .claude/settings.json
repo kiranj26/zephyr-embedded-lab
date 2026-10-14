@@ -1,0 +1,49 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(make build:*)",
+      "Bash(make flash:*)",
+      "Bash(make capture:*)",
+      "Bash(make clean:*)",
+      "Bash(make list)",
+      "Bash(make ports)",
+      "Bash(make doctor)",
+      "Bash(make new-app:*)",
+      "Bash(make notes:*)",
+      "Bash(make pins:*)",
+      "Bash(python3 scripts/check_pins.py:*)",
+      "Bash(docker ps:*)",
+      "Bash(docker exec zephyr-lab:*)",
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(ls:*)",
+      "Bash(grep:*)",
+      "Bash(find:*)"
+    ],
+    "deny": [
+      "Read(./workspace/**/secrets.h)",
+      "Bash(git push:*)",
+      "Bash(make monitor)",
+      "Bash(make run:*)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/guard_course.py\"" }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/pin_safety.py\"" }
+        ]
+      }
+    ]
+  }
+}

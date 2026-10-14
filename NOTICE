@@ -1,0 +1,5 @@
+This repository builds on "Introduction to Zephyr" by Shawn Hymel (DigiKey),
+https://github.com/ShawnHymel/introduction-to-zephyr — licensed under Apache-2.0.
+The course repository is included as a git submodule at course/ and is not modified.
+Starter apps, driver/board templates and overlays in workspace/ are adapted from the
+course's structure and remain under Apache-2.0.

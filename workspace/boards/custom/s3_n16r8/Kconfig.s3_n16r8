@@ -1,0 +1,10 @@
+# Board target: s3_n16r8/esp32s3/procpu  ->  symbol BOARD_S3_N16R8_ESP32S3_PROCPU
+# (The course's Kconfig.my_board checks BOARD_NYAN_ESP32S3_PROCPU by mistake — don't copy that.)
+#
+# Module selection: the pinned Zephyr revision may only ship esp32s3_wroom_n8.dtsi / SOC_ESP32S3_WROOM_N8.
+# Check: docker exec zephyr-lab ls /opt/toolchains/zephyr/dts/xtensa/espressif/esp32s3/
+# and:   docker exec zephyr-lab grep -rn "config SOC_ESP32S3_WROOM" /opt/toolchains/zephyr/soc
+# If an N16R8 variant exists, switch both this select and the #include in the .dts.
+config BOARD_S3_N16R8
+	select SOC_ESP32S3_WROOM_N8
+	select SOC_ESP32S3_PROCPU if BOARD_S3_N16R8_ESP32S3_PROCPU

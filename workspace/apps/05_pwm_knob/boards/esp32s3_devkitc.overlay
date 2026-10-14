@@ -1,0 +1,11 @@
+/* Lesson 5 — Devicetree bindings: ADC + PWM
+ * Wiring: pot ends -> 3V3 / GND, wiper -> GPIO1 (ADC1 channel 0). LED on GPIO13 (via 330R).
+ *
+ * Part A (demo): enable &adc0, add channel@0 with the zephyr,* properties the binding requires.
+ *   Find the binding: /opt/toolchains/zephyr/dts/bindings/adc/  (which properties are "required"?)
+ *   Aliases: my-adc = &adc0; my-adc-channel = &<your channel label>;
+ * Part B (challenge): a "pwm-leds" node using &ledc0, a pinctrl group LEDC_CH0_GPIO13,
+ *   and alias led-0. You'll need: #include <zephyr/dt-bindings/pwm/pwm.h>
+ */
+/ {
+};

@@ -1,0 +1,84 @@
+/dts-v1/;
+
+/* See Kconfig.s3_n16r8 about the module dtsi choice for the pinned Zephyr revision. */
+#include "espressif/esp32s3/esp32s3_wroom_n8.dtsi"
+#include "s3_n16r8-pinctrl.dtsi"
+#include <zephyr/dt-bindings/input/input-event-codes.h>
+#include <espressif/partitions_0x0_amp.dtsi>
+
+/ {
+	model = "ESP32-S3-DevKitC-1 N16R8 (lab) PROCPU";
+	compatible = "espressif,esp32s3";
+
+	aliases {
+		watchdog0 = &wdt0;
+		uart-0 = &uart0;
+		led-0 = &led0;
+		sw0 = &button0;
+		/* TODO (lesson 12 challenge): my-sensor = &mcp9808_18; */
+	};
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,console = &uart0;
+		zephyr,shell-uart = &uart0;
+		zephyr,flash = &flash0;
+		zephyr,code-partition = &slot0_partition;
+		/* TODO (challenge): zephyr,display = &st7735r_160x80; */
+	};
+
+	leds {
+		compatible = "gpio-leds";
+		led0: led_0 {
+			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+			label = "External LED (GPIO13)";
+		};
+	};
+
+	buttons {
+		compatible = "gpio-keys";
+		button0: button_0 {
+			gpios = <&gpio0 0 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "BOOT button";
+			zephyr,code = <INPUT_KEY_0>;
+		};
+		button1: button_1 {
+			gpios = <&gpio0 5 (GPIO_PULL_UP | GPIO_ACTIVE_LOW)>;
+			label = "External button (GPIO5)";
+			zephyr,code = <INPUT_KEY_1>;
+		};
+	};
+
+	/* TODO (challenge): mipi_dbi node + st7735r child — copy from apps/10_lvgl_ui overlay,
+	 * and use pinctrl-0 = <&spi2_default> on &spi2 below. */
+};
+
+&uart0 {
+	status = "okay";
+	current-speed = <115200>;
+	pinctrl-0 = <&uart0_default>;
+	pinctrl-names = "default";
+};
+
+&gpio0 {
+	status = "okay";
+};
+
+&wdt0 {
+	status = "okay";
+};
+
+/* I2C0 ready for the MCP9808 (challenge: add the sensor child node here) */
+&i2c0 {
+	status = "disabled";	/* set "okay" once you add a device */
+	pinctrl-0 = <&i2c0_default>;
+	pinctrl-names = "default";
+};
+
+&spi2 {
+	#address-cells = <1>;
+	#size-cells = <0>;
+	status = "disabled";	/* set "okay" when you add the display */
+	pinctrl-0 = <&spi2_default>;
+	pinctrl-names = "default";
+};

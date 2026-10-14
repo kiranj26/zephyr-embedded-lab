@@ -1,0 +1,12 @@
+# Python venv (host tools: esptool, pyserial)
+venv/
+.venv/
+# Zephyr build output (all builds land in workspace/build/)
+workspace/build/
+**/build/
+# Secrets — never commit Wi-Fi credentials
+**/secrets.h
+# Claude Code personal overrides
+.claude/settings.local.json
+# macOS
+.DS_Store

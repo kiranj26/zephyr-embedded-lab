@@ -1,0 +1,6 @@
+board:
+  name: s3_n16r8
+  full_name: ESP32-S3-DevKitC-1 N16R8 (my lab board)
+  vendor: custom
+  socs:
+  - name: esp32s3

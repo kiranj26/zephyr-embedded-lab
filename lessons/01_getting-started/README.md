@@ -1,0 +1,54 @@
+# Lesson 01 — Getting Started – Installation and Blink
+
+**Video:** Part 1 in the [Introduction to Zephyr playlist](https://www.youtube.com/playlist?list=PLEBQazB0HUyTmK2zdwhaf8bLwuEaDH-52) ·
+**Blog / written version:** [Getting Started – Installation and Blink](https://www.digikey.com/en/maker/tutorials/2025/introduction-to-zephyr-part-1-getting-started-installation-and-blink) ·
+**Course code:** `01_blink` ·
+**Your starter:** `workspace/apps/01_blink` ·
+**Hardware:** LED + 330 Ω on GPIO13
+
+> Everything later builds on this loop: Docker build → host flash → serial console. You also meet devicetree aliases and the GPIO API for the first time.
+
+## 1. Before you watch (5 min)
+- Run `/lesson 01` in Claude Code, or skim this page.
+- Hardware ready? Run `/wire 01` and double-check the pins in `docs/01-hardware.md`.
+
+## 2. Watch guide — look for these
+- [ ] What Zephyr is (kernel + drivers + subsystems + board support) and why it's vendor-neutral
+- [ ] The Docker image: what's in /opt/toolchains (zephyr, modules, SDK) vs /workspace
+- [ ] The board target string `esp32s3_devkitc/esp32s3/procpu` (board / SoC / CPU cluster)
+- [ ] How the overlay creates `my-led` and how `GPIO_DT_SPEC_GET(DT_ALIAS(my_led), gpios)` uses it
+
+## 3. Run the reference (read-only)
+```sh
+make run APP=course/01_blink
+```
+Then read the code. Treat `course/` as a textbook. Don't edit it.
+
+## 4. Build it yourself in `workspace/apps/01_blink`
+1. Wire the LED (`/wire 01`)
+2. Read `workspace/apps/01_blink/src/main.c` line by line; answer the `Q:` comments
+3. `make run APP=01`. You should see `LED state: 1/0` every second
+4. Open `workspace/build/01_blink/zephyr/zephyr.dts` and find your `leds` node and the `aliases` entry
+
+## 5. Challenge (from the video)
+No formal challenge. Do the extension TODOs in the starter (SOS pattern, second LED, timing check).
+
+Stuck? `/hint 01 1`, then level 2, then 3. Open the solution only after a real attempt, then `/review 01`.
+
+## 6. Go deeper (pick at least two)
+- [ ] Browse `/opt/toolchains/zephyr/samples/basic/blinky` and compare it with yours
+- [ ] Read the doc comment for `gpio_pin_set_dt` vs `gpio_pin_set_raw`
+- [ ] Look at `boards/espressif/esp32s3_devkitc/` in the Zephyr tree: which files define a board?
+
+## 7. Self-check (answer in your notes without looking)
+- What three parts make up a board target string?
+- Why can't the container flash the board on macOS?
+- Where does `DT_ALIAS(my_led)` get its value at compile time?
+- What's the difference between `printk` and `printf` here?
+
+## Done when
+- [ ] Reference runs on my board
+- [ ] My version in `workspace/apps/01_blink` runs and I can explain every line
+- [ ] Challenge attempted before peeking, then reviewed
+- [ ] Two "go deeper" items done
+- [ ] `notes.md` written (`/notes 01`), `PROGRESS.md` updated (`/progress`), committed

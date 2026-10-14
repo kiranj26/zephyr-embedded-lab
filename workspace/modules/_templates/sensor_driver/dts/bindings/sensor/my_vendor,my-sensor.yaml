@@ -1,0 +1,13 @@
+description: Template I2C temperature sensor (rename me)
+
+# Must match `compatible` in your overlay and DT_DRV_COMPAT (my_vendor_my_sensor) in the driver
+compatible: "my_vendor,my-sensor"
+
+include: [sensor-device.yaml, i2c-device.yaml]
+
+properties:
+  resolution:
+    type: int
+    default: 3
+    enum: [0, 1, 2, 3]
+    description: Resolution setting written at init (MCP9808 - 3 = 0.0625 C)

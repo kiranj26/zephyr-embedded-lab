@@ -1,0 +1,5 @@
+/* Devicetree overlay for ESP32-S3-DevKitC-1 (N16R8).
+ * Safe pins: see docs/01-hardware.md. NEVER use GPIO 26-37, 19/20, 43/44.
+ */
+/ {
+};

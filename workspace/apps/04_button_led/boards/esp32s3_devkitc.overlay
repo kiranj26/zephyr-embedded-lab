@@ -1,0 +1,12 @@
+/* Lesson 4 — write this overlay yourself.
+ * Wiring: LED on GPIO13 (via 330R), button GPIO5 -> GND (use internal pull-up).
+ *
+ * TODO:
+ *   - aliases: my-led, my-button
+ *   - a "gpio-leds" node with your LED child
+ *   - a "gpio-keys" node with your button child
+ *     flags: (GPIO_ACTIVE_LOW | GPIO_PULL_UP)  <- why active LOW?
+ * After building, find your nodes in workspace/build/04_button_led/zephyr/zephyr.dts
+ */
+/ {
+};

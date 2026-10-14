@@ -1,0 +1,4 @@
+{
+    "cmake.ignoreCMakeListsMissing": true,
+    "files.associations": { "*.overlay": "dts", "*.conf": "properties", "lvgl.h": "c" }
+}
