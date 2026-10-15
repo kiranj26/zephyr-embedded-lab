@@ -6,7 +6,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 |---|---|---|---|---|---|---|---|---|
 | 00 | Setup (Mac, Docker, first flash) | – | ☑ | ☑ | – | – | ☑ | 2026-10-14 |
 | 01 | Getting Started – Blink | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-14 |
-| 02 | CMake | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
+| 02 | CMake | ☐ | ◐ | ☑ | ☑ | ☑ | ☐ | |
 | 03 | Kconfig | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 04 | Devicetree | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 05 | Devicetree Bindings | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
@@ -36,4 +36,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 - Every k_msleep adds +1 tick → drift scales with the number of sleeps (SOS: 22 sleeps = +2.2 ms per cycle)
 - A pinctrl group only applies when its device is enabled (GPIO17 in i2s0_default is harmless while i2s0 is disabled)
 - GPIO_OUTPUT_INACTIVE vs GPIO_OUTPUT: start in a known (off) state
-- #define vs static const vs enum (type, debugger visibility, compile-time constant)
+- #define vs static const vs enum
+- Header path missing = compile error (fatal error: x.h); missing code = link error (undefined reference)
+- PRIVATE / PUBLIC / INTERFACE propagation; `app` is a library Zephyr creates in find_package(Zephyr)
+- zephyr_interface = INTERFACE target carrying Zephyr includes, -imacros autoconf.h, defines, CPU flags (type, debugger visibility, compile-time constant)
