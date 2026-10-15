@@ -13,10 +13,10 @@
 - Hardware ready? Run `/wire 02` and double-check the pins in `docs/01-hardware.md`.
 
 ## 2. Watch guide — look for these
-- [ ] Plain CMake: `project`, `add_library`, `add_executable`, `target_include_directories`, `target_link_libraries`
-- [ ] PUBLIC vs PRIVATE propagation
-- [ ] Generators: Ninja vs Unix Makefiles (`cmake -S . -B build -G ...`)
-- [ ] In Zephyr the executable target already exists: it's called `app`
+- [x] Plain CMake: `project`, `add_library`, `add_executable`, `target_include_directories`, `target_link_libraries`
+- [x] PUBLIC vs PRIVATE propagation
+- [x] Generators: Ninja vs Unix Makefiles (`cmake -S . -B build -G ...`)
+- [x] In Zephyr the executable target already exists: it's called `app`
 
 ## 3. Run the reference (read-only)
 ```sh
