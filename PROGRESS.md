@@ -7,7 +7,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 | 00 | Setup (Mac, Docker, first flash) | – | ☑ | ☑ | – | – | ☑ | 2026-10-14 |
 | 01 | Getting Started – Blink | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-14 |
 | 02 | CMake | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-15 |
-| 03 | Kconfig | ☐ | ☑ | ◐ | ☐ | ☐ | ◐ | |
+| 03 | Kconfig | ☐ | ☑ | ☑ | ◐ | ☑ | ◐ | |
 | 04 | Devicetree | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 05 | Devicetree Bindings | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 06 | Device Drivers | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
@@ -45,4 +45,6 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 - Config layers: defconfig < prj.conf < boards/<board>.conf < -DCONFIG_X; menuconfig only edits build/.config (lost on pristine build)
 - depends on = requirement, select = forces; Zephyr aborts on Kconfig warnings (range, unmet deps, typos)
 - ENTROPY_GENERATOR=y → ESP32 TRNG driver (DT trng0) → hardware random; TEST_RANDOM_GENERATOR = fake, tests only
+- FPU = float math; CBPRINTF_FP_SUPPORT = float printing (else "*float*"); with picolibc, printk uses picolibc vfprintf (+828 B for float)
+- Kconfig: range/unknown → build aborts; unmet depends on → only a warning (value silently dropped)
 - zephyr_interface = INTERFACE target carrying Zephyr includes, -imacros autoconf.h, defines, CPU flags (type, debugger visibility, compile-time constant)

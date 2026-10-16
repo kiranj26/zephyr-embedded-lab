@@ -104,7 +104,7 @@ Review cleanup applied: TODO scaffolding removed, own header first, unused `<std
   4. **Post-build** (`esptool` → `zephyr.bin`)
 
 ## Open questions
-- [ ] Exactly which part of Zephyr's picolibc setup forces `__l_vfprintf` into every image? (Look for `vfprintf` in `cmake/` or `lib/libc/picolibc/`.)
+- [x] Why is `__l_vfprintf` in every image? **Answered in lesson 03:** with `CONFIG_PICOLIBC`, Zephyr's `printk` itself calls picolibc's `vfprintf` (`lib/os/printk.c`). So printk and printf share one engine, and printf only adds about 60 B.
 - [ ] Use `ram_report` to see RAM per file (useful for stack sizing in lesson 08).
 
 ## Next time / ideas
