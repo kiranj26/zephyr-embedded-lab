@@ -13,7 +13,7 @@
 - Hardware ready? Run `/wire 03` and double-check the pins in `docs/01-hardware.md`.
 
 ## 2. Watch guide — look for these
-- [ ] Why Kconfig exists (from Linux) and the menuconfig interface
+- [x] Why Kconfig exists (from Linux) and the menuconfig interface
 - [x] Enabling a random number generator to fix a link error
 - [x] `diff`/`diffconfig` between `.config.old` and `.config`
 - [x] Creating a custom symbol inside a module (`zephyr/module.yaml`, `Kconfig`, `ZEPHYR_EXTRA_MODULES`)

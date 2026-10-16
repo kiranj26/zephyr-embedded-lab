@@ -3,7 +3,7 @@
 Started: 2026-10-16 · Finished: _(in progress: video, own-words paragraph and /review 03 still to do)_
 
 ## The idea in my own words (3–5 sentences)
-_TODO after the video._
+Kconfig decides **which software is compiled into the firmware**, while the devicetree describes which hardware exists. A driver is only built when both agree: on this chip the TRNG was already `okay` in the devicetree, but nothing used it until I set `CONFIG_ENTROPY_GENERATOR=y`. Settings are built up in layers (board defconfig, then `prj.conf`, then `boards/<board>.conf`, then the command line), and the final `.config` becomes `autoconf.h`, where an enabled option is `#define CONFIG_X 1` and a disabled one isn't defined at all. menuconfig only edits the generated `.config`, which a pristine build throws away, so I use it to explore, `make diffconfig` to see what changed, and a `.conf` file to keep it. Kconfig also catches mistakes: out-of-range values stop the build, but an unmet `depends on` only warns. And features like float printing (`CBPRINTF_FP_SUPPORT`) are off by default to save space, which is why `%.3f` printed `*float*` until I enabled it.
 
 ## Key concepts
 - **Kconfig decides which code is compiled in.** Devicetree = what hardware exists, CMake = how to build, Kconfig = which features are in.

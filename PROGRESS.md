@@ -7,7 +7,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 | 00 | Setup (Mac, Docker, first flash) | – | ☑ | ☑ | – | – | ☑ | 2026-10-14 |
 | 01 | Getting Started – Blink | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-14 |
 | 02 | CMake | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-15 |
-| 03 | Kconfig | ☐ | ☑ | ☑ | ◐ | ☑ | ◐ | |
+| 03 | Kconfig | ☑ | ☑ | ☑ | ◐ | ☑ | ◐ | |
 | 04 | Devicetree | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 05 | Devicetree Bindings | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 06 | Device Drivers | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
