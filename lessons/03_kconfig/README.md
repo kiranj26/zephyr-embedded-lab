@@ -13,10 +13,10 @@
 - Hardware ready? Run `/wire 03` and double-check the pins in `docs/01-hardware.md`.
 
 ## 2. Watch guide — look for these
-- [ ] Why Kconfig exists (from Linux) and the menuconfig interface
-- [ ] Enabling a random number generator to fix a link error
-- [ ] `diff`/`diffconfig` between `.config.old` and `.config`
-- [ ] Creating a custom symbol inside a module (`zephyr/module.yaml`, `Kconfig`, `ZEPHYR_EXTRA_MODULES`)
+- [x] Why Kconfig exists (from Linux) and the menuconfig interface
+- [x] Enabling a random number generator to fix a link error
+- [x] `diff`/`diffconfig` between `.config.old` and `.config`
+- [x] Creating a custom symbol inside a module (`zephyr/module.yaml`, `Kconfig`, `ZEPHYR_EXTRA_MODULES`)
 
 ## 3. Run the reference (read-only)
 ```sh
@@ -37,9 +37,9 @@ Print the random number as a float in [0, 1) with `%.3f`. Find the Kconfig that 
 Stuck? `/hint 03 1`, then level 2, then 3. Open the solution only after a real attempt, then `/review 03`.
 
 ## 6. Go deeper (pick at least two)
-- [ ] Measure flash size with and without float printing (`rom_report`)
-- [ ] Find out how `printk` formats floats vs `printf` (search menuconfig for CBPRINTF)
-- [ ] Break a `depends on` on purpose and read the warning Kconfig prints
+- [x] Measure flash size with and without float printing (`rom_report`)
+- [x] Find out how `printk` formats floats vs `printf` (search menuconfig for CBPRINTF)
+- [x] Break a `depends on` on purpose and read the warning Kconfig prints
 
 ## 7. Self-check (answer in your notes without looking)
 - Order the config sources from lowest to highest priority.
@@ -47,8 +47,8 @@ Stuck? `/hint 03 1`, then level 2, then 3. Open the solution only after a real a
 - Why must `ZEPHYR_EXTRA_MODULES` be set before `find_package(Zephyr)`?
 
 ## Done when
-- [ ] Reference runs on my board
-- [ ] My version in `workspace/apps/03_kconfig_random` runs and I can explain every line
-- [ ] Challenge attempted before peeking, then reviewed
-- [ ] Two "go deeper" items done
-- [ ] `notes.md` written (`/notes 03`), `PROGRESS.md` updated (`/progress`), committed
+- [x] Reference runs on my board
+- [x] My version in `workspace/apps/03_kconfig_random` runs and I can explain every line
+- [x] Challenge attempted before peeking, then reviewed
+- [x] Two "go deeper" items done
+- [x] `notes.md` written (`/notes 03`), `PROGRESS.md` updated (`/progress`), committed

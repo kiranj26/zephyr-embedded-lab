@@ -1,0 +1,5 @@
+if(CONFIG_GREETING)
+  zephyr_include_directories(src)
+  zephyr_library()
+  zephyr_library_sources(src/greeting.c)
+endif()
