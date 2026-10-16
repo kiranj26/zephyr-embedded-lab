@@ -1,6 +1,6 @@
 # Notes — 03_kconfig
 
-Started: 2026-10-16 · Finished: _(in progress: video, own-words paragraph and /review 03 still to do)_
+Started: 2026-10-16 · Finished: 2026-10-16
 
 ## The idea in my own words (3–5 sentences)
 Kconfig decides **which software is compiled into the firmware**, while the devicetree describes which hardware exists. A driver is only built when both agree: on this chip the TRNG was already `okay` in the devicetree, but nothing used it until I set `CONFIG_ENTROPY_GENERATOR=y`. Settings are built up in layers (board defconfig, then `prj.conf`, then `boards/<board>.conf`, then the command line), and the final `.config` becomes `autoconf.h`, where an enabled option is `#define CONFIG_X 1` and a disabled one isn't defined at all. menuconfig only edits the generated `.config`, which a pristine build throws away, so I use it to explore, `make diffconfig` to see what changed, and a `.conf` file to keep it. Kconfig also catches mistakes: out-of-range values stop the build, but an unmet `depends on` only warns. And features like float printing (`CBPRINTF_FP_SUPPORT`) are off by default to save space, which is why `%.3f` printed `*float*` until I enabled it.
@@ -100,7 +100,21 @@ How I got there:
 
 Why divide by `UINT32_MAX + 1.0` (= 2³²) and not `UINT32_MAX`? So the result is always < 1.0, giving [0, 1).
 
-_Comparison with `03_solution_kconfig_float`: pending `/review 03`._
+**Comparison with `03_solution_kconfig_float` (/review 03):**
+
+| | Mine | Course | Better |
+|---|---|---|---|
+| Random source | `ENTROPY_GENERATOR=y` (ESP32 RNG via entropy driver) | `TEST_RANDOM_GENERATOR` + `TIMER_RANDOM_GENERATOR` (fake, warning) | mine: real driver, no test-only option |
+| Float option | `CBPRINTF_FP_SUPPORT=y` | `PICOLIBC_IO_FLOAT=y` | mine: states the need and works without picolibc (then printk uses cbprintf, where the picolibc option would do nothing) |
+| Placement | `prj.conf` (needed on any board) | board conf | mine |
+| FPU | measured +0 B, left off | comment says `FPU=y` = "hardware acceleration" for printing | mine is measured |
+
+**Review findings (no bugs), verified in the Zephyr source:**
+- The ESP32 RNG only gets real entropy **"provided WiFi or BT are enabled"** (`drivers/entropy/entropy_esp32.c`). With the radio off it's a weaker hardware PRNG. Don't call it a TRNG for keys or nonces.
+- `sys_rand32_get()`/`sys_rand_get()` can't report errors. On a driver failure they **silently fall back to `k_cycle_get_32()`** (`subsys/random/random_entropy_device.c`). `sys_csrand_get()` returns the error instead, so use it and check it when randomness matters.
+- `depends on PRINTK`: with `PRINTK=n` the module silently disappears (only a warning). Document it in the help text.
+- Style: `ARRAY_SIZE(buffer)`; `GREETING_REPEAT` needs `help` text; `default n` on a bool is redundant; prefer `zephyr_library_named(greeting)`; `zephyr_include_directories(src)` is global (cleaner: `include/greeting/greeting.h`). The last three come from the lab template.
+- `#ifdef CONFIG_GREETING` is a reasonable choice here: the include path only exists when the module is on, so `IS_ENABLED()` couldn't see the prototype.
 
 ## Self-check (README §7)
 - **Config sources, lowest → highest priority:** board defconfig → `prj.conf` → `boards/<board>.conf` → `-DCONFIG_…` (command line).
@@ -118,5 +132,6 @@ _Comparison with `03_solution_kconfig_float`: pending `/review 03`._
 - [ ] `XOSHIRO_RANDOM_GENERATOR`: a fast PRNG seeded from the entropy driver. When is that better than reading the TRNG every time?
 
 ## Next time / ideas
-- Watch Part 3 → write "the idea in my own words" → `/review 03` (compare with `03_solution_kconfig_float`) → commit, then PR.
+- Optional go-deeper from the review: add `sys_csrand_get()` with a checked return. Why does `sys_rand32_get()` fall back silently while `sys_csrand_get()` returns an error?
+- Optional: fix the module template (help text, `zephyr_library_named`, `include/` layout, `menuconfig`/`if` block).
 - Lesson 04 (Devicetree) next.

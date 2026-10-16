@@ -49,6 +49,6 @@ Stuck? `/hint 03 1`, then level 2, then 3. Open the solution only after a real a
 ## Done when
 - [x] Reference runs on my board
 - [x] My version in `workspace/apps/03_kconfig_random` runs and I can explain every line
-- [ ] Challenge attempted before peeking, then reviewed
+- [x] Challenge attempted before peeking, then reviewed
 - [x] Two "go deeper" items done
-- [ ] `notes.md` written (`/notes 03`), `PROGRESS.md` updated (`/progress`), committed
+- [x] `notes.md` written (`/notes 03`), `PROGRESS.md` updated (`/progress`), committed
