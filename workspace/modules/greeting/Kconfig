@@ -1,0 +1,12 @@
+config GREETING
+	bool "Greeting library"
+	default n
+	depends on PRINTK
+	help
+	  Adds greeting_say(), which prints a message. Lesson 3 practice module.
+
+config GREETING_REPEAT
+	int "How many times to greet"
+	default 1
+	range 1 10
+	depends on GREETING

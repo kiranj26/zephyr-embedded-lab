@@ -14,9 +14,9 @@
 
 ## 2. Watch guide — look for these
 - [ ] Why Kconfig exists (from Linux) and the menuconfig interface
-- [ ] Enabling a random number generator to fix a link error
-- [ ] `diff`/`diffconfig` between `.config.old` and `.config`
-- [ ] Creating a custom symbol inside a module (`zephyr/module.yaml`, `Kconfig`, `ZEPHYR_EXTRA_MODULES`)
+- [x] Enabling a random number generator to fix a link error
+- [x] `diff`/`diffconfig` between `.config.old` and `.config`
+- [x] Creating a custom symbol inside a module (`zephyr/module.yaml`, `Kconfig`, `ZEPHYR_EXTRA_MODULES`)
 
 ## 3. Run the reference (read-only)
 ```sh
@@ -47,7 +47,7 @@ Stuck? `/hint 03 1`, then level 2, then 3. Open the solution only after a real a
 - Why must `ZEPHYR_EXTRA_MODULES` be set before `find_package(Zephyr)`?
 
 ## Done when
-- [ ] Reference runs on my board
+- [x] Reference runs on my board
 - [ ] My version in `workspace/apps/03_kconfig_random` runs and I can explain every line
 - [ ] Challenge attempted before peeking, then reviewed
 - [ ] Two "go deeper" items done

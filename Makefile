@@ -4,7 +4,7 @@ APP ?=
 SECS ?= 8
 export BOARD BOARD_ROOT PORT BAUD PLATFORM
 
-.PHONY: help setup bootstrap image up down shell ports list build flash monitor capture run menuconfig clean new-app notes doctor openocd pins
+.PHONY: help setup bootstrap image up down shell ports list build flash monitor capture run menuconfig clean new-app notes doctor openocd pins diffconfig
 
 help:
 	@echo "Setup:    make setup | make bootstrap | make image | make up | make doctor"
@@ -12,7 +12,7 @@ help:
 	@echo "          make build APP=04      make flash APP=04     make monitor"
 	@echo "          make capture SECS=10   (reset board, print serial output, exit)"
 	@echo "Course:   make run APP=course/01_blink   (build the reference code read-only)"
-	@echo "Tools:    make list | make ports | make menuconfig APP=03 | make shell | make clean APP=03"
+	@echo "Tools:    make list | make ports | make menuconfig APP=03 | make diffconfig APP=03 | make shell | make clean APP=03"
 	@echo "Create:   make new-app NAME=13_my_idea | make notes N=04"
 	@echo "Debug:    make openocd (host) then GDB/VS Code in the container"
 	@echo "Safety:   make pins FILE=workspace/apps/04_button_led/boards/esp32s3_devkitc.overlay"
@@ -44,6 +44,8 @@ capture:
 run: build flash monitor
 menuconfig:
 	@scripts/build.sh "$(APP)" --menuconfig
+diffconfig:
+	@scripts/diffconfig.sh "$(APP)"
 clean:
 	@scripts/clean.sh "$(APP)"
 new-app:

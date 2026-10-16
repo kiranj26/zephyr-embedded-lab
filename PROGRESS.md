@@ -7,7 +7,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 | 00 | Setup (Mac, Docker, first flash) | – | ☑ | ☑ | – | – | ☑ | 2026-10-14 |
 | 01 | Getting Started – Blink | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-14 |
 | 02 | CMake | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-15 |
-| 03 | Kconfig | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
+| 03 | Kconfig | ☐ | ☑ | ◐ | ☐ | ☐ | ◐ | |
 | 04 | Devicetree | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 05 | Devicetree Bindings | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 06 | Device Drivers | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
@@ -41,4 +41,8 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 - PRIVATE / PUBLIC / INTERFACE propagation; `app` is a library Zephyr creates in find_package(Zephyr)
 - printf cost depends on config: picolibc vfprintf is always linked here, so printf ≈ +60 B; GCC turns constant printf into puts
 - zephyr_library helpers auto-link only in modules; in an app still need target_link_libraries(app …)
+- Kconfig off = NOT defined (not 0); prefer IS_ENABLED(CONFIG_X)
+- Config layers: defconfig < prj.conf < boards/<board>.conf < -DCONFIG_X; menuconfig only edits build/.config (lost on pristine build)
+- depends on = requirement, select = forces; Zephyr aborts on Kconfig warnings (range, unmet deps, typos)
+- ENTROPY_GENERATOR=y → ESP32 TRNG driver (DT trng0) → hardware random; TEST_RANDOM_GENERATOR = fake, tests only
 - zephyr_interface = INTERFACE target carrying Zephyr includes, -imacros autoconf.h, defines, CPU flags (type, debugger visibility, compile-time constant)
