@@ -47,8 +47,8 @@ Stuck? `/hint 04 1`, then level 2, then 3. Open the solution only after a real a
 - Where is the final merged devicetree written?
 
 ## Done when
-- [ ] Reference runs on my board
-- [ ] My version in `workspace/apps/04_button_led` runs and I can explain every line
+- [x] Reference runs on my board
+- [x] My version in `workspace/apps/04_button_led` runs and I can explain every line
 - [ ] Challenge attempted before peeking, then reviewed
 - [ ] Two "go deeper" items done
 - [ ] `notes.md` written (`/notes 04`), `PROGRESS.md` updated (`/progress`), committed

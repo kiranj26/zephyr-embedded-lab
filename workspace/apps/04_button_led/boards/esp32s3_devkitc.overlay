@@ -1,12 +1,34 @@
-/* Lesson 4 — write this overlay yourself.
- * Wiring: LED on GPIO13 (via 330R), button GPIO5 -> GND (use internal pull-up).
+/* Lesson 4: button and LED, described for the esp32s3_devkitc board.
  *
- * TODO:
- *   - aliases: my-led, my-button
- *   - a "gpio-leds" node with your LED child
- *   - a "gpio-keys" node with your button child
- *     flags: (GPIO_ACTIVE_LOW | GPIO_PULL_UP)  <- why active LOW?
- * After building, find your nodes in workspace/build/04_button_led/zephyr/zephyr.dts
+ * Wiring: LED GPIO13 -> 330R -> LED -> GND
+ *         button GPIO5 -> switch -> GND (no resistor: internal pull-up)
+ *
+ * Labels must be unique in the whole merged tree: the board already uses
+ * button0 (its BOOT button on GPIO0), so this overlay uses button1 / led1.
+ * Final merged result: workspace/build/04_button_led/zephyr/zephyr.dts
  */
 / {
+	aliases {
+		my-button = &button1;
+		my-led = &led1;
+	};
+
+	gpio-keys {
+		compatible = "gpio-keys";
+
+		button1: kiran_button {
+			/* Pressed = 0 V, so ACTIVE_LOW; PULL_UP keeps it at 3.3 V when released */
+			gpios = <&gpio0 5 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
+			label = "User Button";
+		};
+	};
+
+	gpio-leds {
+		compatible = "gpio-leds";
+
+		led1: kiran_led {
+			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
+			label = "User LED";
+		};
+	};
 };
