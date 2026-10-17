@@ -8,6 +8,22 @@
 
 > Devicetree describes hardware; Zephyr turns it into compile-time macros. Every peripheral in later lessons starts here.
 
+## My results: demo video
+
+Running on my ESP32-S3-DevKitC-1 (N16R8), from [`workspace/apps/04_button_led`](../../workspace/apps/04_button_led/src/main.c) with its [own overlay](../../workspace/apps/04_button_led/boards/esp32s3_devkitc.overlay).
+
+[![Switch controls LED: click to play the video](DEMO_SWITCH_LED_preview.png)](DEMO_SWITCH_LED.mp4)
+
+**[▶ DEMO_SWITCH_LED.mp4](DEMO_SWITCH_LED.mp4)** (9 s): press the switch on GPIO5 and the LED on GPIO13 turns on; release it and the LED turns off.
+
+| | |
+|---|---|
+| Button | GPIO5 → switch → GND, `(GPIO_ACTIVE_LOW \| GPIO_PULL_UP)` = `0x11`, so pressed reads as logical 1 |
+| LED | GPIO13 → 330 Ω → LED → GND, `GPIO_ACTIVE_HIGH` |
+| Serial | `Button: pin 5, dt_flags 0x11 (ACTIVE_LOW \| PULL_UP)`, then `Button pressed -> LED on` / `Button released -> LED off` |
+
+Write-up: [notes.md](notes.md) (overlay → build map, three overlay breaks, floating-input physics, comparison with the course solution)
+
 ## 1. Before you watch (5 min)
 - Run `/lesson 04` in Claude Code, or skim this page.
 - Hardware ready? Run `/wire 04` and double-check the pins in `docs/01-hardware.md`.
