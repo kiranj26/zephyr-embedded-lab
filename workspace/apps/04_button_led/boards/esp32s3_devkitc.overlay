@@ -3,8 +3,15 @@
  * Wiring: LED GPIO13 -> 330R -> LED -> GND
  *         button GPIO5 -> switch -> GND (no resistor: internal pull-up)
  *
- * Labels must be unique in the whole merged tree: the board already uses
- * button0 (its BOOT button on GPIO0), so this overlay uses button1 / led1.
+ * This adds a NEW /gpio-keys node instead of reusing the board's /buttons node:
+ * a node with the same path would be merged into the board's (changing its
+ * properties too), so a separate node keeps the board's BOOT button untouched.
+ *
+ * Labels must be unique across the whole merged tree; reusing the board's
+ * button0 would be a dtc duplicate-label error, so these are button1 / led1.
+ *
+ * gpio-keys / gpio-leds are pure data here: CONFIG_INPUT and CONFIG_LED are off,
+ * so no driver claims these pins; main.c reads them through GPIO_DT_SPEC_GET.
  * Final merged result: workspace/build/04_button_led/zephyr/zephyr.dts
  */
 / {
@@ -16,8 +23,10 @@
 	gpio-keys {
 		compatible = "gpio-keys";
 
-		button1: kiran_button {
-			/* Pressed = 0 V, so ACTIVE_LOW; PULL_UP keeps it at 3.3 V when released */
+		button1: user-button {
+			/* Pressed = 0 V, so ACTIVE_LOW; PULL_UP holds it at 3.3 V when released
+			 * (without it the input floats and reads random presses)
+			 */
 			gpios = <&gpio0 5 (GPIO_ACTIVE_LOW | GPIO_PULL_UP)>;
 			label = "User Button";
 		};
@@ -26,7 +35,7 @@
 	gpio-leds {
 		compatible = "gpio-leds";
 
-		led1: kiran_led {
+		led1: user-led {
 			gpios = <&gpio0 13 GPIO_ACTIVE_HIGH>;
 			label = "User LED";
 		};

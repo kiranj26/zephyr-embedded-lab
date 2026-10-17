@@ -8,10 +8,18 @@
  * Logical vs physical: the button is wired GPIO5 -> switch -> GND with
  * (GPIO_ACTIVE_LOW | GPIO_PULL_UP). Pressed pulls the pin to 0 V, but because it's
  * declared active-low, gpio_pin_get_dt() returns 1 ("active") when pressed.
+ *
+ * Polling, not interrupts: simple, but up to 100 ms latency and 10 wake-ups/s.
+ * Lesson 09 replaces this loop with a GPIO interrupt.
  */
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/gpio.h>
 
+/*
+ * Also acts as the debounce: a mechanical switch bounces for ~1-10 ms, far shorter
+ * than one poll period, so each read sees a settled level. Shorten this (or switch
+ * to interrupts) and bounces would show up as extra pressed/released events.
+ */
 static const int32_t poll_interval_ms = 100;
 
 /* .port = gpio0 controller, .pin = 5, .dt_flags = 0x11 (ACTIVE_LOW | PULL_UP) */
@@ -50,10 +58,10 @@ int main(void)
 	}
 
 	/* Decode the devicetree flags (values from dt-bindings/gpio/gpio.h) */
-	printk("Button: pin %d, dt_flags 0x%02x (%s%s)\n", button.pin, button.dt_flags,
+	printk("Button: pin %u, dt_flags 0x%02x (%s%s)\n", button.pin, button.dt_flags,
 	       (button.dt_flags & GPIO_ACTIVE_LOW) ? "ACTIVE_LOW" : "ACTIVE_HIGH",
 	       (button.dt_flags & GPIO_PULL_UP) ? " | PULL_UP" : "");
-	printk("LED:    pin %d, dt_flags 0x%02x\n", led.pin, led.dt_flags);
+	printk("LED:    pin %u, dt_flags 0x%02x\n", led.pin, led.dt_flags);
 
 	while (1) {
 		/* Logical level: 1 = pressed (active-low already applied) */

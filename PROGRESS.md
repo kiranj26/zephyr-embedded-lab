@@ -8,7 +8,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 | 01 | Getting Started – Blink | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-14 |
 | 02 | CMake | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-15 |
 | 03 | Kconfig | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-16 |
-| 04 | Devicetree | ☐ | ☑ | ☑ | ◐ | ☐ | ☐ | |
+| 04 | Devicetree | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-17 |
 | 05 | Devicetree Bindings | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 06 | Device Drivers | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 07 | Debugging (OpenOCD/GDB) | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
@@ -50,4 +50,6 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 - sys_rand*() falls back silently to k_cycle_get_32() on driver failure; sys_csrand_get() returns the error. ESP32 RNG = real entropy only with Wi-Fi/BT on
 - Button: GPIO_ACTIVE_LOW | GPIO_PULL_UP (0x11) → gpio_pin_get_dt() = 1 when pressed; configure_dt merges dt_flags, so C only says GPIO_INPUT
 - DT labels must be unique across the merged tree (board already has button0); alias = name for C, label = name inside DT
+- Floating input: CMOS input ≈ pF + GΩ → wire = antenna → random reads; pull-up pins it. PULL_UP = stability, ACTIVE_LOW = interpretation; wrong flags still build
+- DT: same path = merged into existing node; &{/path} extends deliberately; DT boolean = true only if present (gpio-keys polling-mode default off)
 - zephyr_interface = INTERFACE target carrying Zephyr includes, -imacros autoconf.h, defines, CPU flags (type, debugger visibility, compile-time constant)
