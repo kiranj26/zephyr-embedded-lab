@@ -1,11 +1,98 @@
-/* Lesson 5 — Devicetree bindings: ADC + PWM
- * Wiring: pot ends -> 3V3 / GND, wiper -> GPIO1 (ADC1 channel 0). LED on GPIO13 (via 330R).
+/* Lesson 5 — Devicetree bindings: ADC knob -> PWM LED brightness
  *
- * Part A (demo): enable &adc0, add channel@0 with the zephyr,* properties the binding requires.
- *   Find the binding: /opt/toolchains/zephyr/dts/bindings/adc/  (which properties are "required"?)
- *   Aliases: my-adc = &adc0; my-adc-channel = &<your channel label>;
- * Part B (challenge): a "pwm-leds" node using &ledc0, a pinctrl group LEDC_CH0_GPIO13,
- *   and alias led-0. You'll need: #include <zephyr/dt-bindings/pwm/pwm.h>
+ * Wiring: potentiometer ends -> 3V3 / GND, wiper -> GPIO6 = ADC1 channel 5.
+ *         (The course uses GPIO1 = channel 0.)
+ *         LED: GPIO13 -> 330R -> LED -> GND, driven by LEDC channel 0 (PWM).
+ *
+ * Provider / consumer pairs:
+ *   ADC  provider: &adc0 + channel@5      -> HOW input 5 is sampled
+ *        (rules: dts/bindings/adc/espressif,esp32-adc.yaml + adc-controller.yaml)
+ *   PWM  provider: &ledc0 + channel@0     -> LEDC channel 0 on timer 0
+ *        (rules: dts/bindings/pwm/espressif,esp32-ledc.yaml + pinctrl-device.yaml)
+ *   pins: &pinctrl ledc0_default          -> routes LEDC channel 0's output to GPIO13
+ *   consumer: zephyr,user                 -> WHICH ADC input and PWM output the app uses
+ *        (C: ADC_DT_SPEC_GET_BY_NAME(..., knob), PWM_DT_SPEC_GET_BY_NAME(..., led))
+ *
+ * Channel 0 must agree in three places: LEDC_CH0_GPIO13, reg = <0>, and the first pwms cell.
+ * A mismatch builds fine and silently leaves the LED dark.
  */
+
+/* PWM_HZ / PWM_MSEC / PWM_POLARITY_*: unlike the ADC and pinctrl macros, nothing
+ * the board already includes defines these, so the overlay must include them itself.
+ */
+#include <zephyr/dt-bindings/pwm/pwm.h>
+
 / {
+	zephyr,user {
+		/* <&adc0 5>: one cell after the phandle (#io-channel-cells = <1>) = input 5 */
+		io-channels = <&adc0 5>;
+		io-channel-names = "knob";
+
+		/* Board calibration for the brightness mapping: the highest voltage this ADC
+		 * input actually reaches (measured: 3151 mV at full right, ESP32-S3 at 11 dB).
+		 * zephyr,user has no binding, so custom properties like this are allowed;
+		 * C reads it with DT_PROP(DT_PATH(zephyr_user), knob_full_scale_mv).
+		 */
+		knob-full-scale-mv = <3150>;
+
+		/* <&ledc0 channel period flags> (#pwm-cells = <3>).
+		 * Period 1 ms = 1 kHz: no visible flicker, and 80 MHz / 1 kHz still allows the
+		 * full 14-bit duty resolution on the ESP32-S3. Periods are in nanoseconds.
+		 */
+		pwms = <&ledc0 0 PWM_HZ(1000) PWM_POLARITY_NORMAL>;
+		pwm-names = "led";
+	};
+};
+
+/* The board has no LEDC pin group, so define one: LEDC channel 0 output -> GPIO13 */
+&pinctrl {
+	ledc0_default: ledc0_default {
+		group1 {
+			pinmux = <LEDC_CH0_GPIO13>;
+			output-enable;
+		};
+	};
+};
+
+/* ADC1 is called adc0 in Zephyr (Zephyr counts from 0, Espressif from 1).
+ * unit, channel-count and #io-channel-cells are already set by the SoC .dtsi.
+ */
+&adc0 {
+	status = "okay";
+	/* Required by the binding as const: children are addressed by one number (reg = channel) */
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* Node name must be "channel" for the ADC API macros; @5 must match reg */
+	channel@5 {
+		reg = <5>;
+		/* ESP32: gain 1/4 = 11 dB attenuation, input range ~0..3.1 V (only 4 gains work) */
+		zephyr,gain = "ADC_GAIN_1_4";
+		/* Internal ~1.1 V reference. With it, adc_raw_to_millivolts_dt() asks the driver
+		 * for the reference value, so zephyr,vref-mv is not needed (binding description).
+		 */
+		zephyr,reference = "ADC_REF_INTERNAL";
+		/* The ESP32 can't change the sampling time */
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		/* ESP32-S3 supports 12-bit only */
+		zephyr,resolution = <12>;
+	};
+};
+
+/* LEDC was "disabled" in the SoC .dtsi. pinctrl-0/pinctrl-names apply the pin group
+ * when the driver initialises; without them the group exists but is never used.
+ */
+&ledc0 {
+	status = "okay";
+	pinctrl-0 = <&ledc0_default>;
+	pinctrl-names = "default";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@0 {
+		/* Channel ID: the S3 has channels 0-7 (the binding allows 0-15 for other chips) */
+		reg = <0>;
+		/* One of the 4 timers; the timer sets the frequency for every channel using it */
+		timer = <0>;
+	};
 };
