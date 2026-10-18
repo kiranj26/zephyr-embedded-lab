@@ -1,11 +1,43 @@
-/* Lesson 5 — Devicetree bindings: ADC + PWM
- * Wiring: pot ends -> 3V3 / GND, wiper -> GPIO1 (ADC1 channel 0). LED on GPIO13 (via 330R).
+/* Lesson 5 — Devicetree bindings: ADC (+ PWM in part B)
  *
- * Part A (demo): enable &adc0, add channel@0 with the zephyr,* properties the binding requires.
- *   Find the binding: /opt/toolchains/zephyr/dts/bindings/adc/  (which properties are "required"?)
- *   Aliases: my-adc = &adc0; my-adc-channel = &<your channel label>;
- * Part B (challenge): a "pwm-leds" node using &ledc0, a pinctrl group LEDC_CH0_GPIO13,
- *   and alias led-0. You'll need: #include <zephyr/dt-bindings/pwm/pwm.h>
+ * Wiring: potentiometer ends -> 3V3 / GND, wiper -> GPIO6 = ADC1 channel 5.
+ *         (The course uses GPIO1 = channel 0.) LED on GPIO13 via 330R (part B).
+ *
+ * Two roles, as in any devicetree "provider/consumer" pair:
+ *   provider: &adc0 and its channel@5 child  -> HOW the input is sampled
+ *             (rules: dts/bindings/adc/espressif,esp32-adc.yaml + adc-controller.yaml)
+ *   consumer: zephyr,user io-channels        -> WHICH input the app uses
+ *             (read in C with ADC_DT_SPEC_GET_BY_NAME(DT_PATH(zephyr_user), knob))
  */
 / {
+	zephyr,user {
+		/* <&adc0 5>: one cell after the phandle (#io-channel-cells = <1>) = input 5 */
+		io-channels = <&adc0 5>;
+		io-channel-names = "knob";
+	};
+};
+
+/* ADC1 is called adc0 in Zephyr (Zephyr counts from 0, Espressif from 1).
+ * unit, channel-count and #io-channel-cells are already set by the SoC .dtsi.
+ */
+&adc0 {
+	status = "okay";
+	/* Required by the binding as const: children are addressed by one number (reg = channel) */
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	/* Node name must be "channel" for the ADC API macros; @5 must match reg */
+	channel@5 {
+		reg = <5>;
+		/* ESP32: gain 1/4 = 11 dB attenuation, input range ~0..3.1 V (only 4 gains work) */
+		zephyr,gain = "ADC_GAIN_1_4";
+		/* Internal ~1.1 V reference. With it, adc_raw_to_millivolts_dt() asks the driver
+		 * for the reference value, so zephyr,vref-mv is not needed (binding description).
+		 */
+		zephyr,reference = "ADC_REF_INTERNAL";
+		/* The ESP32 can't change the sampling time */
+		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
+		/* ESP32-S3 supports 12-bit only */
+		zephyr,resolution = <12>;
+	};
 };
