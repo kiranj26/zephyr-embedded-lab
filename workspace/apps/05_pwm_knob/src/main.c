@@ -1,23 +1,57 @@
 /*
- * Lesson 5 — ADC knob (-> PWM LED brightness in part B)
+ * Lesson 5 — ADC knob -> PWM LED brightness
  *
- * Part A: read the potentiometer on GPIO6 (ADC1 channel 5) every 100 ms and print
- * the value and the voltage. Everything about the channel (which ADC, which input,
- * gain, reference, resolution) comes from the devicetree via the zephyr,user node.
+ * Every 50 ms: read the potentiometer on GPIO6 (ADC1 channel 5), convert it to
+ * millivolts, and set the LED's PWM duty cycle to the same fraction of 3.3 V
+ * (linear mapping). Knob left = off, middle = ~half duty, right = ~full.
+ * All hardware details (ADC input, gain, PWM channel, period, pin) come from the
+ * devicetree via the zephyr,user node.
  *
  *   [x] A. ADC: adc_dt_spec from devicetree, setup, read, convert to mV
- *   [ ] B. PWM: LED brightness follows the knob (challenge)
+ *   [x] B. PWM: LED brightness follows the knob (challenge)
  */
 #include <zephyr/kernel.h>
 #include <zephyr/drivers/adc.h>
+#include <zephyr/drivers/pwm.h>
 
-static const int32_t sample_interval_ms = 100;
+/* Faster than part A's 100 ms so the LED follows the knob without visible lag.
+ * The PWM itself runs in hardware at 1 kHz regardless of how often we update it.
+ */
+static const int32_t sample_interval_ms = 50;
+
+/* Full scale for the mapping: the supply voltage. The knob tops out at ~3151 mV
+ * (ESP32-S3 at 11 dB attenuation), so full right gives ~95% duty.
+ */
+#define KNOB_FULL_SCALE_MV 3300
 
 /*
  * Follows zephyr,user's io-channels entry named "knob" -> <&adc0 5> and fills in
  * .dev (adc0), .channel_id (5) and .channel_cfg (gain, reference, ...) from channel@5.
  */
 static const struct adc_dt_spec knob = ADC_DT_SPEC_GET_BY_NAME(DT_PATH(zephyr_user), knob);
+
+/*
+ * Follows zephyr,user's pwms entry named "led" -> <&ledc0 0 PWM_HZ(1000) ...> and fills in
+ * .dev (ledc0), .channel (0), .period (1000000 ns) and .flags (normal polarity).
+ */
+static const struct pwm_dt_spec led = PWM_DT_SPEC_GET_BY_NAME(DT_PATH(zephyr_user), led);
+
+/*
+ * Linear map: pulse = period * mv / full_scale, clamped to [0, period].
+ * The multiply is done in 64 bits: 1000000 ns * 3300 mV = 3.3e9, which overflows
+ * 32-bit arithmetic. Casting one operand promotes the whole expression.
+ */
+static uint32_t mv_to_pulse_ns(int32_t mv, uint32_t period_ns)
+{
+	if (mv <= 0) {
+		return 0;
+	}
+	if (mv >= KNOB_FULL_SCALE_MV) {
+		return period_ns;
+	}
+
+	return (uint32_t)(((uint64_t)period_ns * (uint32_t)mv) / KNOB_FULL_SCALE_MV);
+}
 
 int main(void)
 {
@@ -53,8 +87,15 @@ int main(void)
 		return ret;
 	}
 
-	printk("Knob on %s channel %d, %d-bit\n", knob.dev->name, knob.channel_id,
+	/* LEDC driver initialised (pins routed by pinctrl-0) before main() */
+	if (!pwm_is_ready_dt(&led)) {
+		printk("Error: PWM device %s not ready\n", led.dev->name);
+		return -ENODEV;
+	}
+
+	printk("Knob: %s channel %d, %d-bit\n", knob.dev->name, knob.channel_id,
 	       knob.resolution);
+	printk("LED:  %s channel %u, period %u ns\n", led.dev->name, led.channel, led.period);
 
 	while (1) {
 		ret = adc_read_dt(&knob, &sequence);
@@ -72,10 +113,22 @@ int main(void)
 
 		ret = adc_raw_to_millivolts_dt(&knob, &mv);
 		if (ret < 0) {
-			printk("Raw: %4d  (mV conversion failed: %d)\n", sample, ret);
-		} else {
-			printk("Raw: %4d  mV: %4d\n", sample, mv);
+			printk("Error %d: mV conversion failed (raw %d)\n", ret, sample);
+			k_msleep(sample_interval_ms);
+			continue;
 		}
+
+		uint32_t pulse_ns = mv_to_pulse_ns(mv, led.period);
+
+		/* Only the duty cycle changes; the period stays at the devicetree's 1 ms */
+		ret = pwm_set_pulse_dt(&led, pulse_ns);
+		if (ret < 0) {
+			printk("Error %d: could not set PWM pulse %u ns\n", ret, pulse_ns);
+			return ret;
+		}
+
+		printk("Raw: %4d  mV: %4d  pulse: %7u ns  duty: %3u%%\n", sample, mv, pulse_ns,
+		       (uint32_t)(((uint64_t)pulse_ns * 100U) / led.period));
 
 		k_msleep(sample_interval_ms);
 	}

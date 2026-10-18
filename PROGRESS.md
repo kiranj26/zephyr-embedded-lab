@@ -9,7 +9,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 | 02 | CMake | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-15 |
 | 03 | Kconfig | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-16 |
 | 04 | Devicetree | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-17 |
-| 05 | Devicetree Bindings | ☐ | ☑ | ◐ | ☐ | ☐ | ◐ | |
+| 05 | Devicetree Bindings | ☑ | ☑ | ☑ | ◐ | ☐ | ◐ | |
 | 06 | Device Drivers | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 07 | Debugging (OpenOCD/GDB) | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 08 | Multithreading | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
@@ -54,4 +54,6 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 - DT: same path = merged into existing node; &{/path} extends deliberately; DT boolean = true only if present (gpio-keys polling-mode default off)
 - Bindings: properties/child-binding/required/enum/const; follow include:. Missing required → build error; enum value chip can't do → runtime -ENOTSUP
 - ADC: zephyr,user io-channels (consumer) + &adc0 channel@N (provider); ESP32 "raw" is calibrated, mV = raw*4400/4096; vref-mv ignored with ADC_REF_INTERNAL
+- PWM API in ns; LEDC 8 ch/4 timers; period vs resolution (80 MHz/f, max 14 bit) → 1 kHz for LEDs; pinctrl routes peripheral signal → pin, applied via pinctrl-0/names
+- Overlay macros need their header (#include <zephyr/dt-bindings/pwm/pwm.h>); 64-bit multiply avoids period×value overflow
 - zephyr_interface = INTERFACE target carrying Zephyr includes, -imacros autoconf.h, defines, CPU flags (type, debugger visibility, compile-time constant)

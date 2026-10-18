@@ -1,6 +1,6 @@
 # Notes — 05_dt-bindings
 
-Started: 2026-10-17 · Finished: _(in progress: part A ADC done; part B PWM, challenge, go-deeper, video still to do)_
+Started: 2026-10-17 · Finished: _(in progress: parts A and B done and on video, Part 5 watched; /review 05 and go-deeper still to do)_
 
 ## The idea in my own words (3–5 sentences)
 _TODO at the end of the lesson._
@@ -24,6 +24,20 @@ _TODO at the end of the lesson._
 - **`zephyr,user`** is a special node for application data, with no binding rules. In C: `DT_PATH(zephyr_user)`.
 - **Analog pins are fixed in silicon:** the ADC is not routed through the GPIO matrix, unlike digital signals, so only ADC pins work. ESP32-S3: ADC1 = GPIO1–10 (ch 0–9), ADC2 = GPIO11–20 (unusable with Wi-Fi).
 - **Zephyr `adc0` = Espressif ADC1** (Zephyr counts from 0).
+- **PWM:** a digital pin can't output "half", so it switches on/off fast and the eye averages it. period = one on+off cycle; pulse = on-time; duty = pulse/period. **Zephyr's PWM API is in nanoseconds** (`PWM_NSEC(x) = x`, `PWM_USEC`, `PWM_MSEC`, `PWM_HZ(f) = 1e9/f`).
+- **LEDC** (the ESP32's PWM): the S3 has **8 channels (0–7)** and **4 timers (0–3)**. A timer sets the frequency; a channel picks a timer and sets the duty. The hardware generates the waveform on its own, so the CPU only changes the duty.
+- **Period vs resolution trade-off** (`pwm_led_esp32.c`): ticks per period = 80 MHz / f, so the driver picks the largest resolution that fits (max 14 bits on the S3).
+
+  | Period | Freq | Levels | Verdict |
+  |---|---|---|---|
+  | 20 ms | 50 Hz | 14 bits | **flicker** visible (peripheral vision, camera bands) |
+  | **1 ms** | **1 kHz** | **14 bits (16 384)** | ✅ sweet spot for LEDs |
+  | 1 µs | 1 MHz | ~6 bits (64) | steppy brightness |
+
+- **pinctrl routes internal peripheral signals to pins** through the GPIO matrix. `LEDC_CH0_GPIO13` = `ESP32_PINMUX(13, ESP_NOSIG, ESP_LEDC_LS_SIG_OUT0)`. The board has no LEDC group, so I defined `&pinctrl { ledc0_default: … group1 { pinmux; output-enable; } }`. **`pinctrl-0`/`pinctrl-names = "default"` on `&ledc0` apply it** (allowed by `pinctrl-device.yaml`). Without them, the group exists but is never used (like the board's unused `i2s0_default`).
+- **Channel 0 must agree in three places:** `LEDC_CH0_GPIO13` ↔ child `reg = <0>` ↔ the first `pwms` cell. A mismatch builds and runs **silently with a dark LED**.
+- **The binding allows more than the chip:** LEDC `reg` enum 0–15, but the S3 has 0–7. The same lesson as `ADC_GAIN_2`.
+- **Overlay macros need their header:** `PWM_HZ`/`PWM_POLARITY_NORMAL` require `#include <zephyr/dt-bindings/pwm/pwm.h>`. The ADC and pinctrl macros worked without an include because the SoC/board `.dtsi` files already include their headers. Missing it gives `devicetree error: … parse error: expected number or parenthesized expression`.
 
 ## Why GPIO6 (instead of the course's GPIO1)
 - 7-check method: ADC1 **channel 5**; not strapping, flash or USB; the board's pinctrl mentions it for I2S0 BCK / TWAI RX, but both are disabled; unused by every later lesson, so it can stay wired.
@@ -53,9 +67,20 @@ _TODO at the end of the lesson._
 | `adc_sequence_init_dt(&spec, &seq)` | sets **only** `channels`, `resolution`, `oversampling`. The buffer is the caller's job |
 | `adc_read_dt(&spec, &seq)` | one conversion into `seq.buffer` |
 | `adc_raw_to_millivolts_dt(&spec, &mv)` | **in place**. Internal reference → `adc_ref_internal(dev)` (1100) × undoing the gain |
+| `PWM_DT_SPEC_GET_BY_NAME(DT_PATH(zephyr_user), led)` | follows `pwms`/`pwm-names` → `{.dev = ledc0, .channel = 0, .period = 1000000, .flags = 0}` |
+| `pwm_is_ready_dt(&spec)` | LEDC driver init OK (pinctrl applied) |
+| `pwm_set_pulse_dt(&spec, pulse_ns)` | set the on-time in ns, keeping the devicetree period. No "setup" call: the devicetree is the configuration |
 
 ## Kconfig
 - `CONFIG_ADC=y` → `CONFIG_ADC_ESP32=y` (`default y`, `depends on DT_HAS_ESPRESSIF_ESP32_ADC_ENABLED`): the two-switch rule.
+- `CONFIG_PWM=y` → `CONFIG_PWM_LED_ESP32=y` (`depends on DT_HAS_ESPRESSIF_ESP32_LEDC_ENABLED`, needs `&ledc0 status = "okay"`). `CONFIG_PINCTRL=y` comes from the board.
+
+## PWM bindings: what mattered
+- `espressif,esp32-ledc.yaml`: `include: [pwm-controller.yaml, pinctrl-device.yaml, base.yaml]`. `#pwm-cells` **const 3** = `channel, period, flags`. Child: `reg` (required, the channel ID) and `timer` (required, 0–3). Its description has the pinctrl template and the "reg must match pinmux" rule.
+- `pwm-controller.yaml`: `#pwm-cells` required (already set by the SoC `.dtsi`).
+- `pinctrl-device.yaml`: `pinctrl-0` … `pinctrl-4` (phandles) and `pinctrl-names` (one name per state; `"default"` is applied at init).
+- `pwm-leds.yaml`: `pwms` required; recommends a period between 100 ns and 50 ms. I used `zephyr,user` instead (consistent with the ADC, and no LED driver can claim the pin).
+- Generated: `DT_N_S_zephyr_user_P_pwms_IDX_0_VAL_channel 0`, `…_VAL_period 1000000`, `…_VAL_flags 0`.
 
 ## What I found in build output / driver source
 - **The ESP32 "raw" value isn't raw** (`drivers/adc/adc_esp32.c`): hardware code → `esp_adc_cal_raw_to_voltage()` (factory eFuse calibration) → ÷4 (gain ¼) → `(mV << 12) / 1100`. So **true_mV = raw × 4400 / 4096**.
@@ -80,18 +105,43 @@ _TODO at the end of the lesson._
 - `return -1` → `-ENODEV` / `ret`.
 - `ADC_DT_SPEC_GET` expects a node with **`io-channels`** (a consumer), not the channel node → `zephyr,user`.
 - **Board disconnected mid-session** (`port is busy or doesn't exist`) → replug the UART cable.
+- **`devicetree error: overlay:18 (column 26): parse error`** → `PWM_HZ` unknown → `#include <zephyr/dt-bindings/pwm/pwm.h>` at the top of the overlay.
+- **`pwm_is_ready_dt(&pwm_channel)`** → no such variable; the spec is `led`.
+- **`CONFIG_PWM` missing** at first → added (otherwise link errors on `pwm_*`).
+- **`APP=05_pwm_Knob` (capital K)** → macOS is case-insensitive, so it found `05_pwm_knob` but made a second build folder `build/05_pwm_Knob`. Use lowercase.
 
 ## Challenge: my approach vs the course solution
-_TODO: part B (PWM via LEDC + pinctrl, knob → brightness), then `/review 05`._
+**Task:** control the LED's brightness with the potentiometer using PWM. ✅ Verified on hardware (`DEMO_PWM_KNOB.mp4`).
+
+**My design:**
+- **Consumer in `zephyr,user`** for both: `io-channels` named `knob` and `pwms` named `led`. C uses `…_GET_BY_NAME(DT_PATH(zephyr_user), …)`.
+- **Mapping from mV, not raw:** `pulse = period × mV / 3300`, a physical meaning ("fraction of 3.3 V"). Full right = 3151/3300 = **95%** duty. Clamped to `[0, period]`.
+- **Overflow:** 1 000 000 ns × 3300 = 3.3e9, too big for 32-bit signed maths → `(uint64_t)period_ns * mv / 3300`. Casting one operand promotes the whole multiply.
+- **Linear** (not gamma), so the middle (48%) looks brighter than "half" to the eye.
+- Update every 50 ms; one line per sample: raw / mV / pulse / duty.
+
+**Measured:**
+
+| Knob | mV | pulse | duty |
+|---|---|---|---|
+| left | 0 | 0 ns | 0% |
+| 1100 mV | 1100 | 333 333 ns | 33% (exactly ⅓) |
+| middle | ~1575 | ~477 000 ns | ~48% |
+| right | 3151 | 954 848 ns | 95% |
+
+Smooth in both directions, with no jumps (so the 64-bit maths works).
+
+_Comparison with `05_solution_pwm_knob`: pending `/review 05`._
 
 ## Self-check (README §7)
 - **Where do you look to know which properties an ADC channel node needs?** The binding: `dts/bindings/adc/espressif,esp32-adc.yaml` and its `include` `adc-controller.yaml` (`child-binding`). Check `zephyr.dts` for what the SoC already sets.
-- **What does pinctrl do on ESP32?** _TODO (part B)._
-- **Units of the period cell in `pwms = <&ledc0 0 1000 …>`?** _TODO (part B)._
+- **What does pinctrl do on ESP32?** It routes a peripheral's internal signal (here LEDC channel 0's output) to a physical pin through the GPIO matrix, and sets the pad (output-enable, pulls). The device applies it via `pinctrl-0` + `pinctrl-names = "default"`.
+- **Units of the period cell in `pwms = <&ledc0 0 1000 …>`?** **Nanoseconds**, so `1000` = 1 µs = 1 MHz, which is far too fast for a smooth dimmable LED (~64 levels). Use `PWM_MSEC(1)` / `PWM_HZ(1000)`.
 
 ## Open questions
 - [ ] Multimeter check of the wiper at full right: is it 3.15 V, matching `adc_raw_to_millivolts_dt()`?
 - [ ] `zephyr,oversampling`: does the ESP32 driver support it, to reduce the noise?
 
 ## Next time / ideas
-- Part B: the LEDC pinctrl group (`LEDC_CH0_GPIO13`), `&ledc0` + `channel0@0`, a `pwm-leds` consumer, `CONFIG_PWM`.
+- `/review 05` vs `05_solution_pwm_knob`.
+- Go-deeper candidates: breathing LED (smooth fade with no knob), gamma-corrected mapping, multimeter calibration (part A data ready).

@@ -1,19 +1,49 @@
-/* Lesson 5 — Devicetree bindings: ADC (+ PWM in part B)
+/* Lesson 5 — Devicetree bindings: ADC knob -> PWM LED brightness
  *
  * Wiring: potentiometer ends -> 3V3 / GND, wiper -> GPIO6 = ADC1 channel 5.
- *         (The course uses GPIO1 = channel 0.) LED on GPIO13 via 330R (part B).
+ *         (The course uses GPIO1 = channel 0.)
+ *         LED: GPIO13 -> 330R -> LED -> GND, driven by LEDC channel 0 (PWM).
  *
- * Two roles, as in any devicetree "provider/consumer" pair:
- *   provider: &adc0 and its channel@5 child  -> HOW the input is sampled
- *             (rules: dts/bindings/adc/espressif,esp32-adc.yaml + adc-controller.yaml)
- *   consumer: zephyr,user io-channels        -> WHICH input the app uses
- *             (read in C with ADC_DT_SPEC_GET_BY_NAME(DT_PATH(zephyr_user), knob))
+ * Provider / consumer pairs:
+ *   ADC  provider: &adc0 + channel@5      -> HOW input 5 is sampled
+ *        (rules: dts/bindings/adc/espressif,esp32-adc.yaml + adc-controller.yaml)
+ *   PWM  provider: &ledc0 + channel@0     -> LEDC channel 0 on timer 0
+ *        (rules: dts/bindings/pwm/espressif,esp32-ledc.yaml + pinctrl-device.yaml)
+ *   pins: &pinctrl ledc0_default          -> routes LEDC channel 0's output to GPIO13
+ *   consumer: zephyr,user                 -> WHICH ADC input and PWM output the app uses
+ *        (C: ADC_DT_SPEC_GET_BY_NAME(..., knob), PWM_DT_SPEC_GET_BY_NAME(..., led))
+ *
+ * Channel 0 must agree in three places: LEDC_CH0_GPIO13, reg = <0>, and the first pwms cell.
+ * A mismatch builds fine and silently leaves the LED dark.
  */
+
+/* PWM_HZ / PWM_MSEC / PWM_POLARITY_*: unlike the ADC and pinctrl macros, nothing
+ * the board already includes defines these, so the overlay must include them itself.
+ */
+#include <zephyr/dt-bindings/pwm/pwm.h>
+
 / {
 	zephyr,user {
 		/* <&adc0 5>: one cell after the phandle (#io-channel-cells = <1>) = input 5 */
 		io-channels = <&adc0 5>;
 		io-channel-names = "knob";
+
+		/* <&ledc0 channel period flags> (#pwm-cells = <3>).
+		 * Period 1 ms = 1 kHz: no visible flicker, and 80 MHz / 1 kHz still allows the
+		 * full 14-bit duty resolution on the ESP32-S3. Periods are in nanoseconds.
+		 */
+		pwms = <&ledc0 0 PWM_HZ(1000) PWM_POLARITY_NORMAL>;
+		pwm-names = "led";
+	};
+};
+
+/* The board has no LEDC pin group, so define one: LEDC channel 0 output -> GPIO13 */
+&pinctrl {
+	ledc0_default: ledc0_default {
+		group1 {
+			pinmux = <LEDC_CH0_GPIO13>;
+			output-enable;
+		};
 	};
 };
 
@@ -39,5 +69,23 @@
 		zephyr,acquisition-time = <ADC_ACQ_TIME_DEFAULT>;
 		/* ESP32-S3 supports 12-bit only */
 		zephyr,resolution = <12>;
+	};
+};
+
+/* LEDC was "disabled" in the SoC .dtsi. pinctrl-0/pinctrl-names apply the pin group
+ * when the driver initialises; without them the group exists but is never used.
+ */
+&ledc0 {
+	status = "okay";
+	pinctrl-0 = <&ledc0_default>;
+	pinctrl-names = "default";
+	#address-cells = <1>;
+	#size-cells = <0>;
+
+	channel@0 {
+		/* Channel ID: the S3 has channels 0-7 (the binding allows 0-15 for other chips) */
+		reg = <0>;
+		/* One of the 4 timers; the timer sets the frequency for every channel using it */
+		timer = <0>;
 	};
 };
