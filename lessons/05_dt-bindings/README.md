@@ -13,9 +13,9 @@
 - Hardware ready? Run `/wire 05` and double-check the pins in `docs/01-hardware.md`.
 
 ## 2. Watch guide — look for these
-- [ ] How a binding YAML declares required/optional properties
-- [ ] ADC channel child nodes and `zephyr,*` properties
-- [ ] `ADC_CHANNEL_CFG_DT`, `adc_sequence`, `adc_read`
+- [x] How a binding YAML declares required/optional properties
+- [x] ADC channel child nodes and `zephyr,*` properties
+- [x] `ADC_CHANNEL_CFG_DT`, `adc_sequence`, `adc_read`
 - [ ] PWM via the ESP32 LEDC peripheral + pinctrl
 
 ## 3. Run the reference (read-only)
@@ -47,7 +47,7 @@ Stuck? `/hint 05 1`, then level 2, then 3. Open the solution only after a real a
 - Units of the period cell in `pwms = <&ledc0 0 1000 ...>`?
 
 ## Done when
-- [ ] Reference runs on my board
+- [x] Reference runs on my board
 - [ ] My version in `workspace/apps/05_pwm_knob` runs and I can explain every line
 - [ ] Challenge attempted before peeking, then reviewed
 - [ ] Two "go deeper" items done
