@@ -9,7 +9,7 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 | 02 | CMake | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-15 |
 | 03 | Kconfig | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-16 |
 | 04 | Devicetree | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-17 |
-| 05 | Devicetree Bindings | ☑ | ☑ | ☑ | ◐ | ☐ | ◐ | |
+| 05 | Devicetree Bindings | ☑ | ☑ | ☑ | ☑ | ☑ | ☑ | 2026-10-18 |
 | 06 | Device Drivers | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 07 | Debugging (OpenOCD/GDB) | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
 | 08 | Multithreading | ☐ | ☐ | ☐ | ☐ | ☐ | ☐ | |
@@ -56,4 +56,6 @@ Legend: ☐ todo · ◐ in progress · ☑ done. Ask Claude Code to `/progress` 
 - ADC: zephyr,user io-channels (consumer) + &adc0 channel@N (provider); ESP32 "raw" is calibrated, mV = raw*4400/4096; vref-mv ignored with ADC_REF_INTERNAL
 - PWM API in ns; LEDC 8 ch/4 timers; period vs resolution (80 MHz/f, max 14 bit) → 1 kHz for LEDs; pinctrl routes peripheral signal → pin, applied via pinctrl-0/names
 - Overlay macros need their header (#include <zephyr/dt-bindings/pwm/pwm.h>); 64-bit multiply avoids period×value overflow
+- Never return from main() with an actuator running (LED freezes at last duty) → safe state + keep going; rate-limit errors and prints
+- Gamma: perceived brightness ~ log → pulse ∝ fraction² for an even-looking fade; zephyr,user custom props (DT_PROP) hold board calibration
 - zephyr_interface = INTERFACE target carrying Zephyr includes, -imacros autoconf.h, defines, CPU flags (type, debugger visibility, compile-time constant)

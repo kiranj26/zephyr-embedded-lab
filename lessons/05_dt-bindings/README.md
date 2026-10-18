@@ -53,8 +53,8 @@ Stuck? `/hint 05 1`, then level 2, then 3. Open the solution only after a real a
 
 ## 6. Go deeper (pick at least two)
 - [ ] Use `adc_raw_to_millivolts_dt()` and calibrate against a multimeter
-- [ ] Breathing LED (no knob) with smooth fade
-- [ ] Why does the course use `zephyr,vref-mv = <3894>` / `<3900>` with `ADC_GAIN_1_4`? Research ESP32 ADC attenuation
+- [x] Breathing LED (no knob) with smooth fade
+- [x] Why does the course use `zephyr,vref-mv = <3894>` / `<3900>` with `ADC_GAIN_1_4`? Research ESP32 ADC attenuation
 
 ## 7. Self-check (answer in your notes without looking)
 - Where do you look to know which properties an ADC channel node needs?
@@ -64,6 +64,6 @@ Stuck? `/hint 05 1`, then level 2, then 3. Open the solution only after a real a
 ## Done when
 - [x] Reference runs on my board
 - [x] My version in `workspace/apps/05_pwm_knob` runs and I can explain every line
-- [ ] Challenge attempted before peeking, then reviewed
-- [ ] Two "go deeper" items done
-- [ ] `notes.md` written (`/notes 05`), `PROGRESS.md` updated (`/progress`), committed
+- [x] Challenge attempted before peeking, then reviewed
+- [x] Two "go deeper" items done
+- [x] `notes.md` written (`/notes 05`), `PROGRESS.md` updated (`/progress`), committed

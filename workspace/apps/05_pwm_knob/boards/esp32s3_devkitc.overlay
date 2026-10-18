@@ -28,6 +28,13 @@
 		io-channels = <&adc0 5>;
 		io-channel-names = "knob";
 
+		/* Board calibration for the brightness mapping: the highest voltage this ADC
+		 * input actually reaches (measured: 3151 mV at full right, ESP32-S3 at 11 dB).
+		 * zephyr,user has no binding, so custom properties like this are allowed;
+		 * C reads it with DT_PROP(DT_PATH(zephyr_user), knob_full_scale_mv).
+		 */
+		knob-full-scale-mv = <3150>;
+
 		/* <&ledc0 channel period flags> (#pwm-cells = <3>).
 		 * Period 1 ms = 1 kHz: no visible flicker, and 80 MHz / 1 kHz still allows the
 		 * full 14-bit duty resolution on the ESP32-S3. Periods are in nanoseconds.

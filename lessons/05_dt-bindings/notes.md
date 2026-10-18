@@ -1,9 +1,9 @@
 # Notes — 05_dt-bindings
 
-Started: 2026-10-17 · Finished: _(in progress: parts A and B done and on video, Part 5 watched; /review 05 and go-deeper still to do)_
+Started: 2026-10-17 · Finished: 2026-10-18
 
 ## The idea in my own words (3–5 sentences)
-_TODO at the end of the lesson._
+A binding is the rulebook for a `compatible`: it says which properties a node and its children must or may have, their types and allowed values, and its description explains what they mean on this chip. Bindings validated my nodes all along; I only had to read them once a peripheral had children, enums and chip-specific meanings, like the ESP32 ADC (gain = attenuation) and LEDC (channel, timer, pinctrl). The pattern is always provider plus consumer: `&adc0`/`channel@5` and `&ledc0`/`channel@0` describe the hardware, and `zephyr,user` says which input and output my app uses, so the C contains no pins or numbers. The binding catches missing or malformed properties at build time, but only the driver knows what the chip can really do, so some mistakes (`ADC_GAIN_2`, a channel above 7) only show up as runtime errors, and others (mismatched channel numbers) not at all. When numbers look wrong, I read the driver: that's how I found the calibrated "raw" value and the correct mV formula.
 
 ## Key concepts
 - **Bindings were always there.** Every `compatible` has a YAML binding that validated my nodes in lessons 01–04 (`gpio-leds`, `gpio-keys`, `espressif,esp32-gpio`, `…-trng`, `…-uart`). GPIO nodes needed only 1 property, so copying an example was enough. The ADC has children, enums and chip-specific meanings, so I had to read the rulebook.
@@ -108,6 +108,7 @@ _TODO at the end of the lesson._
 - **`devicetree error: overlay:18 (column 26): parse error`** → `PWM_HZ` unknown → `#include <zephyr/dt-bindings/pwm/pwm.h>` at the top of the overlay.
 - **`pwm_is_ready_dt(&pwm_channel)`** → no such variable; the spec is `led`.
 - **`CONFIG_PWM` missing** at first → added (otherwise link errors on `pwm_*`).
+- **A breathe build once failed with `'__device_dts_ord_8' undeclared`**, and the identical rebuild passed. Most likely two builds wrote the same build folder at once. Not reproducible; if it happens, rebuild.
 - **`APP=05_pwm_Knob` (capital K)** → macOS is case-insensitive, so it found `05_pwm_knob` but made a second build folder `build/05_pwm_Knob`. Use lowercase.
 
 ## Challenge: my approach vs the course solution
@@ -131,7 +132,30 @@ _TODO at the end of the lesson._
 
 Smooth in both directions, with no jumps (so the 64-bit maths works).
 
-_Comparison with `05_solution_pwm_knob`: pending `/review 05`._
+**Comparison with `05_solution_pwm_knob` (/review 05):**
+
+| | Mine | Course | Better |
+|---|---|---|---|
+| PWM period | `PWM_HZ(1000)` = 1 ms → **14 bits** (16 384 levels) | `1000` = **1 µs = 1 MHz** → ~6 bits (64 levels): the self-check trap | mine |
+| Mapping | mV / knob-full-scale-mv (from the devicetree) → reaches 100% | raw / 4096 → **max 72%** (calibrated raw tops out at 2934), float maths | mine |
+| mV | `adc_raw_to_millivolts_dt` (correct) | `vref-mv = 3900` read but unused for brightness | mine |
+| ADC read error | sleep and retry; LED off after 10 failures | `continue` with **no sleep**: spins and floods | mine |
+| Console | prints only when duty changes ≥ 1% | every **10 ms = 100 lines/s** | mine |
+| Setup errors | real codes | `return 0` silently | mine |
+| LED description | `pwms` in `zephyr,user` | **`pwm-leds` node + alias** | course is more idiomatic: it says "there's an LED here", portable, works with the LED API |
+| ADC API | `adc_dt_spec` + `io-channels` | manual `DEVICE_DT_GET` + `ADC_CHANNEL_CFG_DT` | mine (less code, fewer mistakes) |
+
+**Review fixes applied:**
+- print on change (≥ 1%) instead of 20 lines/s
+- a PWM/ADC failure no longer returns from `main()` (which would freeze the LED at its last duty). Errors are counted and rate-limited, and after 10 in a row the LED goes to a safe state (off)
+- full scale moved into the overlay: `knob-full-scale-mv = <3150>` in `zephyr,user` (no binding, so custom properties are allowed), read with `DT_PROP(DT_PATH(zephyr_user), knob_full_scale_mv)`. Full right now reaches 100%
+- `prj.conf` comments; `int16_t` sample explained; `%u` for unsigned
+- checked: the SoC `.dtsi` does **not** set `#address-cells`/`#size-cells` on `adc0`/`ledc0`, so the overlay lines are required. The S3 LEDC max is 14 bits (`SOC_LEDC_TIMER_BIT_WIDTH 14`)
+
+## Go deeper (2 done)
+- [x] **Why `zephyr,vref-mv = <3894>/<3900>` with `ADC_GAIN_1_4`?** The ESP32 driver returns a *calibrated* value scaled to its 1100 mV internal reference, so true mV = raw × 1100 × 4 / 4096 = **raw × 4400 / 4096**. 3894/3900 are trial-and-error constants that read about 11% low. With `ADC_REF_INTERNAL`, `adc_raw_to_millivolts_dt()` ignores `vref-mv` and asks the driver (the binding says the property isn't needed). Measured: 3151 mV vs the course's 2789 at full right.
+- [x] **Breathing LED** (`DEMO_BREATHE` in `main.c`): 1 s up, 1 s down, 10 ms steps, `pulse = period × (i/steps)²` (gamma 2, 64-bit maths). Squaring spends more of the ramp at low duty, where the eye is most sensitive, so the fade looks even instead of rushing at the bottom.
+- [ ] Multimeter calibration (optional; the part A data is ready).
 
 ## Self-check (README §7)
 - **Where do you look to know which properties an ADC channel node needs?** The binding: `dts/bindings/adc/espressif,esp32-adc.yaml` and its `include` `adc-controller.yaml` (`child-binding`). Check `zephyr.dts` for what the SoC already sets.
@@ -143,5 +167,5 @@ _Comparison with `05_solution_pwm_knob`: pending `/review 05`._
 - [ ] `zephyr,oversampling`: does the ESP32 driver support it, to reduce the noise?
 
 ## Next time / ideas
-- `/review 05` vs `05_solution_pwm_knob`.
-- Go-deeper candidates: breathing LED (smooth fade with no knob), gamma-corrected mapping, multimeter calibration (part A data ready).
+- Lesson 06: write my own binding and driver (MCP9808, I2C). Today I learned to *read* bindings; next I write one.
+- Possible follow-up: describe the LED with a `pwm-leds` node instead of `zephyr,user` (portable, works with the LED API).
